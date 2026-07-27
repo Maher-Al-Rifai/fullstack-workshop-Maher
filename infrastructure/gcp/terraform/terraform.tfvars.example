@@ -1,0 +1,11 @@
+project_id        = "your-billing-enabled-gcp-project"
+region            = "us-central1"
+github_repository = "your-github-owner/fullstack-intern-workshop"
+
+# Training-cost defaults. Review before any real production deployment.
+artifact_repository      = "workboard"
+cloud_sql_instance_name  = "workboard-postgres"
+database_name            = "workboard"
+database_user            = "workboard_app"
+database_tier            = "db-f1-micro"
+deletion_protection      = false

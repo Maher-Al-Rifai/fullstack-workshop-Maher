@@ -1,0 +1,37 @@
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+.PHONY: help setup validate up down logs ps backend-test frontend-test test clean
+
+help: ## Show commands
+	@awk 'BEGIN {FS = ":.*## "; printf "\nUsage: make <target>\n\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+setup: ## Verify tools and create .env
+	@./scripts/setup.sh
+
+validate: ## Validate the standalone exported starter
+	@python3 scripts/validate-starter.py .
+
+up: ## Build and start the starter stack
+	@docker compose up --build -d
+	@docker compose ps
+
+down: ## Stop the starter stack
+	@docker compose down
+
+logs: ## Follow logs
+	@docker compose logs -f --tail=150
+
+ps: ## Show service state
+	@docker compose ps
+
+backend-test: ## Run FastAPI starter tests
+	@docker compose run --rm backend pytest
+
+frontend-test: ## Run Nuxt starter type checks
+	@docker compose run --rm frontend npm run typecheck
+
+test: backend-test frontend-test ## Run starter verification
+
+clean: ## Remove containers and the disposable database volume
+	@docker compose down -v --remove-orphans

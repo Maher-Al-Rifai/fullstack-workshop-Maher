@@ -1,0 +1,77 @@
+@api = http://localhost:8000/api/v1
+@email = learner@example.com
+@password = StrongPassword123!
+@token = paste-access-token-after-login
+@projectId = 1
+@taskId = 1
+
+### Service status
+GET {{api}}/status
+
+### Register
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "full_name": "Workshop Learner",
+  "password": "{{password}}"
+}
+
+### Login (copy access_token into @token)
+POST {{api}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username={{email}}&password={{password}}
+
+### Current user
+GET {{api}}/auth/me
+Authorization: Bearer {{token}}
+
+### Create project
+POST {{api}}/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "API practice project",
+  "description": "Created from the committed HTTP example",
+  "is_public": true
+}
+
+### List projects
+GET {{api}}/projects
+Authorization: Bearer {{token}}
+
+### Create task
+POST {{api}}/projects/{{projectId}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Write an API contract test",
+  "description": "Protect status and response behavior",
+  "priority": "high",
+  "due_date": "2026-08-01"
+}
+
+### Move task to in progress
+PATCH {{api}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "in_progress"
+}
+
+### Move task to done
+PATCH {{api}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "done"
+}
+
+### Public project
+GET {{api}}/projects/public/api-practice-project

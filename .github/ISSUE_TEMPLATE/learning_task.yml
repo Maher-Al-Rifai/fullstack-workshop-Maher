@@ -1,0 +1,33 @@
+name: Learning task
+description: Track one workshop outcome
+title: "learning: "
+labels: [learning]
+body:
+  - type: input
+    id: module
+    attributes:
+      label: Module
+      placeholder: "06 — PostgreSQL, SQLAlchemy, and Alembic"
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the observable capability to demonstrate.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      placeholder: Test output, PR URL, screenshot, explanation, or demo notes.

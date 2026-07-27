@@ -1,0 +1,57 @@
+name: fullstack-intern-starter
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-workboard}
+      POSTGRES_USER: ${POSTGRES_USER:-workboard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-workboard-local-only}
+    volumes:
+      - starter-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      target: development
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://workboard:workboard-local-only@db:5432/workboard}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/workspace
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000/api/v1}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/workspace
+      - starter-frontend-modules:/workspace/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  starter-postgres-data:
+  starter-frontend-modules:

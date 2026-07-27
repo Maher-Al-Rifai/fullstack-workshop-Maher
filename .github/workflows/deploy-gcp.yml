@@ -1,0 +1,180 @@
+name: Deploy to Google Cloud
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+  RUNTIME_SERVICE_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+  CLOUD_SQL_CONNECTION_NAME: ${{ vars.GCP_CLOUD_SQL_CONNECTION_NAME }}
+  BACKEND_SERVICE: workboard-api
+  FRONTEND_SERVICE: workboard-web
+  MIGRATION_JOB: workboard-migrate
+
+jobs:
+  verify:
+    name: Reuse the complete CI definition
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Build immutable images and deploy revisions
+    runs-on: ubuntu-latest
+    needs: verify
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Confirm cloud-delivery modules are complete
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            backend/alembic.ini
+            backend/migrations/env.py
+            e2e/package.json
+            e2e/playwright.config.ts
+          )
+          for path in "${required[@]}"; do
+            [[ -e "$path" ]] || {
+              echo "Deployment is intentionally disabled in the learner baseline."
+              echo "Missing $path. Complete modules 06 and 14-17 before deploying."
+              exit 1
+            }
+          done
+
+      - name: Authenticate with short-lived GitHub OIDC credentials
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Validate required repository variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(PROJECT_ID REGION REPOSITORY RUNTIME_SERVICE_ACCOUNT CLOUD_SQL_CONNECTION_NAME)
+          for variable_name in "${required[@]}"; do
+            [[ -n "${!variable_name:-}" ]] || { echo "Missing GitHub variable: $variable_name"; exit 1; }
+          done
+
+      - name: Configure Artifact Registry authentication
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build and push immutable images
+        shell: bash
+        run: |
+          set -euo pipefail
+          BACKEND_IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/workboard-backend:${GITHUB_SHA}"
+          FRONTEND_IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/workboard-frontend:${GITHUB_SHA}"
+          echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$GITHUB_ENV"
+          docker build --target production --tag "$BACKEND_IMAGE" backend
+          docker build --target production --tag "$FRONTEND_IMAGE" frontend
+          docker push "$BACKEND_IMAGE"
+          docker push "$FRONTEND_IMAGE"
+
+      - name: Deploy and execute controlled database migration job
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run jobs deploy "$MIGRATION_JOB" \
+            --image "$BACKEND_IMAGE" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --service-account "$RUNTIME_SERVICE_ACCOUNT" \
+            --set-cloudsql-instances "$CLOUD_SQL_CONNECTION_NAME" \
+            --set-secrets "DATABASE_URL=workboard-database-url:latest,SECRET_KEY=workboard-secret-key:latest" \
+            --set-env-vars "ENVIRONMENT=production" \
+            --command alembic \
+            --args upgrade,head \
+            --max-retries 1 \
+            --task-timeout 10m \
+            --quiet
+          gcloud run jobs execute "$MIGRATION_JOB" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --wait
+
+      - name: Deploy backend initial revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run deploy "$BACKEND_SERVICE" \
+            --image "$BACKEND_IMAGE" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --platform managed \
+            --service-account "$RUNTIME_SERVICE_ACCOUNT" \
+            --set-cloudsql-instances "$CLOUD_SQL_CONNECTION_NAME" \
+            --set-secrets "DATABASE_URL=workboard-database-url:latest,SECRET_KEY=workboard-secret-key:latest" \
+            --set-env-vars 'ENVIRONMENT=production,DEBUG=false,REFRESH_COOKIE_SECURE=true,REFRESH_COOKIE_SAMESITE=none,CORS_ORIGINS=["https://placeholder.invalid"]' \
+            --port 8000 \
+            --cpu 1 \
+            --memory 512Mi \
+            --min 0 \
+            --max 5 \
+            --allow-unauthenticated \
+            --quiet
+          BACKEND_URL="$(gcloud run services describe "$BACKEND_SERVICE" --region "$REGION" --project "$PROJECT_ID" --format='value(status.url)')"
+          echo "BACKEND_URL=$BACKEND_URL" >> "$GITHUB_ENV"
+
+      - name: Deploy frontend revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run deploy "$FRONTEND_SERVICE" \
+            --image "$FRONTEND_IMAGE" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --platform managed \
+            --service-account "$RUNTIME_SERVICE_ACCOUNT" \
+            --set-env-vars "NUXT_PUBLIC_API_BASE=${BACKEND_URL}/api/v1,NUXT_API_INTERNAL_BASE=${BACKEND_URL}/api/v1,NODE_ENV=production" \
+            --port 3000 \
+            --cpu 1 \
+            --memory 512Mi \
+            --min 0 \
+            --max 5 \
+            --allow-unauthenticated \
+            --quiet
+          FRONTEND_URL="$(gcloud run services describe "$FRONTEND_SERVICE" --region "$REGION" --project "$PROJECT_ID" --format='value(status.url)')"
+          echo "FRONTEND_URL=$FRONTEND_URL" >> "$GITHUB_ENV"
+
+      - name: Restrict backend browser origins to the deployed frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services update "$BACKEND_SERVICE" \
+            --region "$REGION" \
+            --project "$PROJECT_ID" \
+            --update-env-vars "^@^CORS_ORIGINS=[\"${FRONTEND_URL}\"]" \
+            --quiet
+
+      - name: Run production smoke checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --retry 8 --retry-all-errors "${BACKEND_URL}/health/ready"
+          curl --fail --show-error --retry 8 --retry-all-errors "${FRONTEND_URL}/api/health"
+          curl --fail --show-error --retry 8 --retry-all-errors "${FRONTEND_URL}/"
+          {
+            echo "### Deployment completed"
+            echo "- Backend: ${BACKEND_URL}"
+            echo "- Frontend: ${FRONTEND_URL}"
+            echo "- Image revision: ${GITHUB_SHA}"
+          } >> "$GITHUB_STEP_SUMMARY"

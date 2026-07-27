@@ -1,0 +1,16 @@
+.env
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+node_modules/
+.nuxt/
+.output/
+coverage/
+playwright-report/
+test-results/
