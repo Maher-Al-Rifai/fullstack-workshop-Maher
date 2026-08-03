@@ -4,7 +4,7 @@ Create a personal copy. Update it at least once per work session and before ever
 
 ## Learner
 
-- Name: Maher Al Rifai
+- Name: NO NAME
 - Cohort:
 - Start date:
 - Mentor:
