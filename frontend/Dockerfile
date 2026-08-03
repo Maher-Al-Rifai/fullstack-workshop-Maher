@@ -1,8 +1,10 @@
 # syntax=docker/dockerfile:1.7
-FROM node:22.16.0-alpine AS dependencies
+FROM node:22-alpine AS dependencies
 WORKDIR /workspace
+RUN npm install -g npm@11
+
 COPY package.json ./
-RUN npm install --no-audit --no-fund
+RUN npm install --no-audit --no-fund --fetch-retries 5 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000
 
 FROM dependencies AS development
 COPY . .
@@ -13,7 +15,7 @@ FROM dependencies AS build
 COPY . .
 RUN npm run build
 
-FROM node:22.16.0-alpine AS production
+FROM node:22-alpine AS production
 ENV NODE_ENV=production \
     NITRO_HOST=0.0.0.0 \
     NITRO_PORT=3000

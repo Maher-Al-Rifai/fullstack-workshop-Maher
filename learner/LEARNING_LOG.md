@@ -4,7 +4,7 @@ Create a personal copy. Update it at least once per work session and before ever
 
 ## Learner
 
-- Name:
+- Name:Maher Al Rifai
 - Cohort:
 - Start date:
 - Mentor:
@@ -22,7 +22,7 @@ Create a personal copy. Update it at least once per work session and before ever
 **Date and branch**
 
 - Date:
-- Branch:
+- Branch: learning/02-git-workflow
 - Pull request:
 
 **Objectives in my own words**
