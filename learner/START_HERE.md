@@ -60,3 +60,5 @@ Do not copy an entire file and then reverse-engineer an explanation. The worksho
 ## Completion
 
 You finish when you can perform [FINAL_DEMO.md](FINAL_DEMO.md) from a clean checkout, pass the rubric, and hand over an accurate runbook. Module checkboxes alone are not completion.
+
+a small edited line for git testing.
