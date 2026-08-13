@@ -8,7 +8,7 @@ from app.models.base import Base, TimestampMixin
 
 
 class TaskStatus(str, enum.Enum):
-    todo = "todo"
+    backlog = "backlog"
     in_progress = "in_progress"
     done = "done"
     cancelled = "cancelled"
@@ -34,7 +34,9 @@ class Task(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[TaskStatus] = mapped_column(
-        SAEnum(TaskStatus, name="task_status"), nullable=False, default=TaskStatus.todo
+        SAEnum(TaskStatus, name="task_status"),
+        nullable=False,
+        default=TaskStatus.backlog,
     )
     priority: Mapped[TaskPriority] = mapped_column(
         SAEnum(TaskPriority, name="task_priority"),
