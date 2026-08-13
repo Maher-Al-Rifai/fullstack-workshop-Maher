@@ -14,3 +14,12 @@ def test_live_health_does_not_require_database() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "alive"}
+
+
+def test_combined_health_returns_process_and_database_keys() -> None:
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "process" in data
+    assert "database" in data
