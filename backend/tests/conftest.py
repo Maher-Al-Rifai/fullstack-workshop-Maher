@@ -77,3 +77,11 @@ def other_client(db_session: Session, other_user: User) -> TestClient:
     app.dependency_overrides[get_current_user] = lambda: other_user
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def auth_client(db_session: Session) -> TestClient:
+    """Client with real JWT auth — only overrides get_db, not get_current_user."""
+    app.dependency_overrides[get_db] = lambda: db_session
+    yield TestClient(app)
+    app.dependency_overrides.clear()
