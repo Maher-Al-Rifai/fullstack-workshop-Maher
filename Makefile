@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help setup validate up down logs ps backend-test frontend-test test clean
+.PHONY: help setup validate up down logs ps backend-test backend-quality frontend-test test clean
 
 help: ## Show commands
 	@awk 'BEGIN {FS = ":.*## "; printf "\nUsage: make <target>\n\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -27,6 +27,13 @@ ps: ## Show service state
 
 backend-test: ## Run FastAPI starter tests
 	@docker compose run --rm backend pytest
+
+backend-quality: ## Lint, type-check, and test backend with coverage (container gate)
+	@docker compose run --rm backend sh -c "\
+		ruff check . && \
+		ruff format --check . && \
+		mypy app && \
+		pytest --cov=app --cov-branch --cov-report=term-missing"
 
 frontend-test: ## Run Nuxt starter type checks
 	@docker compose run --rm frontend npm run typecheck

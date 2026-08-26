@@ -18,7 +18,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "httpx>=0.28,<0.29",
+  "mypy==1.15.0",
   "pytest==9.1.1",
+  "pytest-cov==6.1.0",
   "ruff==0.15.22",
 ]
 
@@ -28,6 +30,28 @@ packages = ["app"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = ["app/migrations/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+warn_unused_ignores = true
+# SQLAlchemy 2.0 provides its own mypy plugin for Mapped[] columns
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+# SQLAlchemy relationship() uses string forward refs that are resolved at runtime,
+# not at import time — mypy cannot see the target class without circular imports.
+module = "app.models.*"
+disable_error_code = ["name-defined"]
 
 [tool.ruff]
 target-version = "py313"
