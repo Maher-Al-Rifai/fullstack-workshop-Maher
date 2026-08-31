@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help setup validate up down logs ps backend-test backend-quality frontend-test test clean
+.PHONY: help setup validate up down logs ps backend-test backend-quality frontend-test frontend-quality frontend-install test clean
 
 help: ## Show commands
 	@awk 'BEGIN {FS = ":.*## "; printf "\nUsage: make <target>\n\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -37,6 +37,16 @@ backend-quality: ## Lint, type-check, and test backend with coverage (container 
 
 frontend-test: ## Run Nuxt starter type checks
 	@docker compose run --rm frontend npm run typecheck
+
+frontend-quality: ## Lint, type-check, and build frontend (container gate)
+	@docker compose run --rm frontend sh -c "\
+		npm run postinstall && \
+		npm run lint && \
+		npm run typecheck && \
+		npm run build"
+
+frontend-install: ## Install frontend npm dependencies locally
+	@cd frontend && npm install
 
 test: backend-test frontend-test ## Run starter verification
 
