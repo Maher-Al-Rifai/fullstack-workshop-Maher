@@ -1,7 +1,4 @@
 import { createApiFetch } from '~/utils/api-client'
-import type { ApiError } from '~/utils/api-client'
-
-export type { ApiError }
 
 export function useApi() {
   const auth = useAuthStore()
