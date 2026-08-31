@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-07-01',
   devtools: { enabled: false },
-  modules: ['@nuxt/eslint'],
+  modules: ['@pinia/nuxt', '@nuxt/eslint'],
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     // server-side only — never exposed to the browser

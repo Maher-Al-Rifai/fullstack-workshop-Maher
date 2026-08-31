@@ -1,7 +1,20 @@
 <script setup lang="ts">
-definePageMeta({ title: 'Sign in' })
+definePageMeta({
+  title: 'Sign in',
+  middleware: [
+    // Redirect authenticated users away from the login page.
+    () => {
+      if (import.meta.server) return
+      const auth = useAuthStore()
+      if (auth.isAuthenticated) return navigateTo('/dashboard')
+    },
+  ],
+})
 
 useSeoMeta({ title: 'Sign in — Workboard' })
+
+const route = useRoute()
+const auth = useAuthStore()
 
 const email = ref('')
 const password = ref('')
@@ -12,13 +25,12 @@ async function handleSubmit() {
   error.value = null
   pending.value = true
   try {
-    // Module 11 will wire this to the auth composable.
-    // For now the form structure and accessibility are the focus.
-    await new Promise(r => setTimeout(r, 300))
-    await navigateTo('/dashboard')
+    await auth.login({ username: email.value, password: password.value })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
+    await navigateTo(redirect)
   }
-  catch {
-    error.value = 'Invalid email or password.'
+  catch (err: unknown) {
+    error.value = (err as { message?: string })?.message ?? 'Invalid email or password.'
   }
   finally {
     pending.value = false

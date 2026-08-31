@@ -1,8 +1,15 @@
 <script setup lang="ts">
+const auth = useAuthStore()
+
 const links = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/projects', label: 'Projects' },
 ]
+
+async function handleLogout() {
+  await auth.logout()
+  await navigateTo('/')
+}
 </script>
 
 <template>
@@ -11,7 +18,7 @@ const links = [
       <NuxtLink to="/" class="brand" aria-label="Workboard home">
         Workboard
       </NuxtLink>
-      <nav aria-label="Main navigation">
+      <nav v-if="auth.isAuthenticated" aria-label="Main navigation">
         <ul class="nav-list" role="list">
           <li v-for="link in links" :key="link.to">
             <NuxtLink :to="link.to" class="nav-link">{{ link.label }}</NuxtLink>
@@ -19,8 +26,16 @@ const links = [
         </ul>
       </nav>
       <div class="header-actions">
-        <NuxtLink to="/login" class="btn btn-ghost">Sign in</NuxtLink>
-        <NuxtLink to="/register" class="btn btn-primary">Register</NuxtLink>
+        <template v-if="auth.isAuthenticated">
+          <span class="user-name">{{ auth.user?.full_name }}</span>
+          <button type="button" class="btn btn-ghost" @click="handleLogout">
+            Sign out
+          </button>
+        </template>
+        <template v-else>
+          <NuxtLink to="/login" class="btn btn-ghost">Sign in</NuxtLink>
+          <NuxtLink to="/register" class="btn btn-primary">Register</NuxtLink>
+        </template>
       </div>
     </div>
   </header>

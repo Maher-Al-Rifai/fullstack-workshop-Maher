@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+psycopg://workboard:workboard-local-only@db:5432/workboard"
     )
+    secret_key: str = "change-me-in-production"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

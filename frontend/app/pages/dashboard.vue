@@ -1,30 +1,32 @@
 <script setup lang="ts">
-import type { Project } from '~/types'
-
-definePageMeta({ title: 'Dashboard' })
-
+definePageMeta({ title: 'Dashboard', middleware: ['auth'] })
 useSeoMeta({ title: 'Dashboard — Workboard' })
 
-// Placeholder data until Module 11 wires the auth composable and API client.
-const projects: Project[] = [
-  {
-    id: 1,
-    name: 'Capstone delivery plan',
-    description: 'All 19 workshop modules tracked as tasks.',
-    slug: 'capstone-delivery-plan',
-    is_public: true,
-    owner_id: 1,
-    created_at: '2026-01-01T00:00:00.000Z',
-    updated_at: '2026-01-01T00:00:00.000Z',
-  },
-]
+const auth = useAuthStore()
+const { listProjects } = useProjects()
+
+const projects = ref<Awaited<ReturnType<typeof listProjects>>>([])
+const pending = ref(true)
+const fetchError = ref<string | null>(null)
+
+onMounted(async () => {
+  try {
+    projects.value = await listProjects()
+  }
+  catch (err: unknown) {
+    fetchError.value = (err as { message?: string })?.message ?? 'Failed to load projects.'
+  }
+  finally {
+    pending.value = false
+  }
+})
 </script>
 
 <template>
   <div>
     <div class="page-header">
       <h1 class="page-title">Dashboard</h1>
-      <p class="page-subtitle">Your projects and recent activity.</p>
+      <p class="page-subtitle">Welcome back, {{ auth.user?.full_name }}.</p>
     </div>
 
     <section aria-label="Your projects">
@@ -34,10 +36,10 @@ const projects: Project[] = [
       </div>
 
       <!-- Loading state -->
-      <!-- <UiLoadingSpinner label="Loading projects…" /> -->
+      <UiLoadingSpinner v-if="pending" label="Loading projects…" />
 
       <!-- Error state -->
-      <!-- <UiErrorAlert message="Could not load projects." /> -->
+      <UiErrorAlert v-else-if="fetchError" :message="fetchError" />
 
       <!-- Empty state -->
       <div v-if="projects.length === 0" class="empty-state">

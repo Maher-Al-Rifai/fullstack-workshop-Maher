@@ -1,7 +1,18 @@
 <script setup lang="ts">
-definePageMeta({ title: 'Register' })
+definePageMeta({
+  title: 'Register',
+  middleware: [
+    () => {
+      if (import.meta.server) return
+      const auth = useAuthStore()
+      if (auth.isAuthenticated) return navigateTo('/dashboard')
+    },
+  ],
+})
 
 useSeoMeta({ title: 'Create account — Workboard' })
+
+const auth = useAuthStore()
 
 const fullName = ref('')
 const email = ref('')
@@ -13,12 +24,11 @@ async function handleSubmit() {
   error.value = null
   pending.value = true
   try {
-    // Module 11 will wire this to the auth composable.
-    await new Promise(r => setTimeout(r, 300))
+    await auth.register({ email: email.value, full_name: fullName.value, password: password.value })
     await navigateTo('/dashboard')
   }
-  catch {
-    error.value = 'Registration failed. That email may already be registered.'
+  catch (err: unknown) {
+    error.value = (err as { message?: string })?.message ?? 'Registration failed. That email may already be registered.'
   }
   finally {
     pending.value = false
