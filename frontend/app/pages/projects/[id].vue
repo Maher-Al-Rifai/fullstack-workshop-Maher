@@ -2,6 +2,7 @@
 import type { Task, TaskStatus } from '~/types'
 
 definePageMeta({ title: 'Project detail', middleware: ['auth'] })
+useSeoMeta({ robots: 'noindex' })
 
 const route = useRoute()
 const projectId = Number(route.params.id)

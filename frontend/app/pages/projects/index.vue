@@ -2,7 +2,7 @@
 import type { Project } from '~/types'
 
 definePageMeta({ title: 'Projects', middleware: ['auth'] })
-useSeoMeta({ title: 'Projects — Workboard' })
+useSeoMeta({ title: 'Projects — Workboard', robots: 'noindex' })
 
 const { listProjects, createProject } = useProjects()
 

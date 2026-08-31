@@ -11,6 +11,18 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api/v1',
     },
   },
+  routeRules: {
+    // Static home page — prerendered at build time
+    '/': { prerender: true },
+    // Public project pages — SSR + 60 s stale-while-revalidate
+    '/public/projects/**': { swr: 60 },
+    // Authenticated pages — client-only; no SSR (auth state is in memory)
+    '/dashboard': { ssr: false },
+    '/projects': { ssr: false },
+    '/projects/**': { ssr: false },
+    '/login': { ssr: false },
+    '/register': { ssr: false },
+  },
   typescript: {
     strict: true,
     typeCheck: true,

@@ -25,3 +25,12 @@ class ProjectRead(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class PublicProjectRead(BaseModel):
+    id: int
+    name: str
+    description: str | None
+    slug: str
+    task_count: int
+    done_count: int

@@ -2,6 +2,9 @@
 useSeoMeta({
   title: 'Workboard — Full-Stack Workshop',
   description: 'A team task board built across 19 workshop modules with FastAPI, PostgreSQL, and Nuxt.',
+  ogTitle: 'Workboard — Full-Stack Workshop',
+  ogDescription: 'A team task board built across 19 workshop modules with FastAPI, PostgreSQL, and Nuxt.',
+  ogType: 'website',
 })
 </script>
 

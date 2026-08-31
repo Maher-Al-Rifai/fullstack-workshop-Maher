@@ -5,7 +5,7 @@ from app.api.deps import get_current_user
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
+from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate, PublicProjectRead
 from app.services import project_service
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -28,10 +28,10 @@ def create_project(
     return project_service.create_project(db, current_user.id, data)
 
 
-@router.get("/public/{slug}", response_model=ProjectRead)
+@router.get("/public/{slug}", response_model=PublicProjectRead)
 def get_public_project(slug: str, db: Session = Depends(get_db)):
     try:
-        return project_service.get_public_by_slug(db, slug)
+        return project_service.get_public_by_slug_with_counts(db, slug)
     except NotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 

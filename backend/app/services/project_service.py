@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError
 from app.models.project import Project
+from app.models.task import TaskStatus
 from app.repositories import project_repository
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
@@ -62,3 +63,17 @@ def get_public_by_slug(db: Session, slug: str) -> Project:
     if project is None or not project.is_public:
         raise NotFoundError("Project not found")
     return project
+
+
+def get_public_by_slug_with_counts(db: Session, slug: str) -> dict:
+    project = get_public_by_slug(db, slug)
+    task_count = len(project.tasks)
+    done_count = sum(1 for t in project.tasks if t.status == TaskStatus.done)
+    return {
+        "id": project.id,
+        "name": project.name,
+        "description": project.description,
+        "slug": project.slug,
+        "task_count": task_count,
+        "done_count": done_count,
+    }

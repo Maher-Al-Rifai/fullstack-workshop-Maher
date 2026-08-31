@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({ title: 'Dashboard', middleware: ['auth'] })
-useSeoMeta({ title: 'Dashboard — Workboard' })
+useSeoMeta({ title: 'Dashboard — Workboard', robots: 'noindex' })
 
 const auth = useAuthStore()
 const { listProjects } = useProjects()

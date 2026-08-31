@@ -10,7 +10,7 @@ definePageMeta({
   ],
 })
 
-useSeoMeta({ title: 'Create account — Workboard' })
+useSeoMeta({ title: 'Create account — Workboard', robots: 'noindex' })
 
 const auth = useAuthStore()
 

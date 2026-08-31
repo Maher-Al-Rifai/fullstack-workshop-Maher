@@ -21,7 +21,7 @@ async function handleLogout() {
       <nav v-if="auth.isAuthenticated" aria-label="Main navigation">
         <ul class="nav-list" role="list">
           <li v-for="link in links" :key="link.to">
-            <NuxtLink :to="link.to" class="nav-link">{{ link.label }}</NuxtLink>
+            <NuxtLink :to="link.to" class="nav-link" :aria-current="$route.path === link.to ? 'page' : undefined">{{ link.label }}</NuxtLink>
           </li>
         </ul>
       </nav>

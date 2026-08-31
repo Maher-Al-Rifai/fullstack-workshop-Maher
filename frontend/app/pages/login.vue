@@ -11,7 +11,7 @@ definePageMeta({
   ],
 })
 
-useSeoMeta({ title: 'Sign in — Workboard' })
+useSeoMeta({ title: 'Sign in — Workboard', robots: 'noindex' })
 
 const route = useRoute()
 const auth = useAuthStore()
