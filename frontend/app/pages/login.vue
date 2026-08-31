@@ -25,7 +25,7 @@ async function handleSubmit() {
   error.value = null
   pending.value = true
   try {
-    await auth.login({ username: email.value, password: password.value })
+    await auth.login({ email: email.value, password: password.value })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
     await navigateTo(redirect)
   }

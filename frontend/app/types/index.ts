@@ -2,7 +2,7 @@
 // TypeScript types describe the shape; runtime validation is the backend's responsibility.
 
 export type TaskStatus = 'backlog' | 'in_progress' | 'done' | 'cancelled'
-export type TaskPriority = 'low' | 'medium' | 'high'
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
 
 export interface User {
   id: number
@@ -20,7 +20,6 @@ export interface Project {
   is_public: boolean
   owner_id: number
   created_at: string
-  updated_at: string
 }
 
 export interface Task {
@@ -34,7 +33,6 @@ export interface Task {
   due_date: string | null
   estimate_hours: number | null
   created_at: string
-  updated_at: string
 }
 
 export interface PublicProject {
@@ -58,13 +56,7 @@ export interface RegisterRequest {
   password: string
 }
 
-// Login uses application/x-www-form-urlencoded; email sent as `username` per OAuth2 convention.
 export interface LoginRequest {
-  username: string
+  email: string
   password: string
-}
-
-export interface ApiError {
-  detail: string
-  code?: string
 }

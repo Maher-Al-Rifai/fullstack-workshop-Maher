@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import type { TaskStatus } from '~/types'
+import { STATUS_LABELS } from '~/utils/labels'
 
 const props = defineProps<{ status: TaskStatus }>()
-
-const labels: Record<TaskStatus, string> = {
-  backlog: 'Backlog',
-  in_progress: 'In Progress',
-  done: 'Done',
-  cancelled: 'Cancelled',
-}
 </script>
 
 <template>
   <span :class="['badge', `badge--${props.status.replace('_', '-')}`]">
-    {{ labels[props.status] }}
+    {{ STATUS_LABELS[props.status] }}
   </span>
 </template>
 

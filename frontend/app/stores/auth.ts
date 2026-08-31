@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await $fetch<TokenResponse>('/api/v1/auth/login', {
       baseURL: config.public.apiBase,
       method: 'POST',
-      body: { email: credentials.username, password: credentials.password },
+      body: { email: credentials.email, password: credentials.password },
       credentials: 'include',
     })
     accessToken.value = data.access_token
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
       method: 'POST',
       body: payload,
     })
-    await login({ username: payload.email, password: payload.password })
+    await login({ email: payload.email, password: payload.password })
   }
 
   async function refresh(): Promise<boolean> {
