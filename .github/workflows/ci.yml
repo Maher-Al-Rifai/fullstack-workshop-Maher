@@ -58,16 +58,7 @@ jobs:
         run: mypy app
       - name: Verify schema against PostgreSQL
         working-directory: backend
-        # Once Alembic migrations are scaffolded (Module 06), replace with:
-        #   alembic upgrade head
-        # For now, verify the ORM schema applies cleanly to a real PostgreSQL instance.
-        run: |
-          python -c "
-          from app.db.session import engine
-          from app.models import Base
-          Base.metadata.create_all(engine)
-          print('Schema applied to PostgreSQL — OK')
-          "
+        run: alembic upgrade head
       - name: Pytest — with coverage
         working-directory: backend
         # TestClient fixtures override get_db with SQLite for speed; this is intentional.
