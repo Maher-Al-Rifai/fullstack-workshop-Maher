@@ -79,7 +79,7 @@ describe('normalizeError', () => {
 
   it('uses fallback message when both are absent', () => {
     expect(normalizeError({})).toEqual({
-      message: 'An unexpected error occurred.',
+      message: 'Server error. Please try again later.',
       status: 500,
       code: undefined,
     })

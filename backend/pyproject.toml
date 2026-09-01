@@ -9,6 +9,7 @@ description = "FastAPI health-check starter for the full-stack intern workshop"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "fastapi==0.139.2",
+  "pydantic>=2.13.0",
   "pydantic-settings==2.14.2",
   "psycopg[binary]==3.3.4",
   "sqlalchemy==2.0.51",

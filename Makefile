@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help setup validate up down logs ps backend-test backend-quality frontend-test frontend-quality frontend-install test clean
+.PHONY: help setup validate up down logs ps backend-test backend-quality frontend-test frontend-quality frontend-install test verify e2e-test clean
 
 help: ## Show commands
 	@awk 'BEGIN {FS = ":.*## "; printf "\nUsage: make <target>\n\n"} /^[a-zA-Z_-]+:.*## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -49,6 +49,13 @@ frontend-install: ## Install frontend npm dependencies locally
 	@cd frontend && npm install
 
 test: backend-test frontend-test ## Run starter verification
+
+verify: backend-quality frontend-quality ## Run all quality gates (lint, typecheck, test, build)
+
+e2e-test: ## Build acceptance stack and run Playwright (Module 15 adds specs)
+	@docker compose -f compose.test.yaml build
+	@docker compose -f compose.test.yaml run --rm playwright
+	@docker compose -f compose.test.yaml down -v --remove-orphans
 
 clean: ## Remove containers and the disposable database volume
 	@docker compose down -v --remove-orphans

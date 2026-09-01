@@ -1,8 +1,8 @@
 name: fullstack-intern-starter-test
 
-# This is the acceptance-stack scaffold. Modules 14 and 15 extend it with
-# production application images, deterministic migrations/seed data, Playwright,
-# host-mounted evidence, and exit-code propagation.
+# Isolated acceptance stack: production images, separate database, no host-port leaks.
+# Browser and server-side API calls both resolve through Docker service DNS.
+# Module 15 replaces the playwright placeholder command with real test specs.
 services:
   db-test:
     image: postgres:17-alpine
@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: workboard_test
       POSTGRES_USER: workboard
       POSTGRES_PASSWORD: test-only-password
+    # No published ports — nothing outside Docker needs to reach this database.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U workboard -d workboard_test"]
       interval: 3s
@@ -22,6 +23,8 @@ services:
       target: production
     environment:
       DATABASE_URL: postgresql+psycopg://workboard:test-only-password@db-test:5432/workboard_test
+      SECRET_KEY: test-only-secret-not-for-production
+      CORS_ORIGINS: '["http://frontend-test:3000","http://localhost:3000"]'
     depends_on:
       db-test:
         condition: service_healthy
@@ -36,7 +39,32 @@ services:
       context: ./frontend
       target: production
     environment:
+      # Both SSR and client-side use Docker service DNS — Playwright runs inside Docker.
       NUXT_PUBLIC_API_BASE: http://backend-test:8000/api/v1
+      NUXT_API_INTERNAL_BASE: http://backend-test:8000/api/v1
     depends_on:
       backend-test:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.49.0-noble
+    working_dir: /e2e
+    volumes:
+      - ./e2e:/e2e
+      - playwright-artifacts:/e2e/test-results
+    environment:
+      BASE_URL: http://frontend-test:3000
+      CI: "1"
+    depends_on:
+      frontend-test:
+        condition: service_healthy
+    # Module 15 replaces this with: npx playwright test
+    command: ["sh", "-c", "echo 'Acceptance stack healthy. Module 15 adds Playwright specs.' && exit 0"]
+
+volumes:
+  playwright-artifacts:

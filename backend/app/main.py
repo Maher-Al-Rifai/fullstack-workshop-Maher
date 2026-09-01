@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -7,11 +9,22 @@ from app.core.exceptions import ConflictError, NotFoundError
 from app.db.session import database_is_ready
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.1.0")
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):  # type: ignore[type-arg]
+    # Ensure all tables exist; idempotent — safe on an already-migrated database.
+    from app.db.session import engine
+    from app.models import Base  # noqa: PLC0415
+    Base.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
