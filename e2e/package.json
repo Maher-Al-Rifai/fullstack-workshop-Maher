@@ -1,0 +1,12 @@
+{
+  "name": "workboard-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "show-report": "playwright show-report test-results/report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.0"
+  }
+}

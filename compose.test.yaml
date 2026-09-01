@@ -59,12 +59,13 @@ services:
       - playwright-artifacts:/e2e/test-results
     environment:
       BASE_URL: http://frontend-test:3000
+      BACKEND_URL: http://backend-test:8000
       CI: "1"
     depends_on:
       frontend-test:
         condition: service_healthy
-    # Module 15 replaces this with: npx playwright test
-    command: ["sh", "-c", "echo 'Acceptance stack healthy. Module 15 adds Playwright specs.' && exit 0"]
+    # npm install resolves types; PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD avoids re-downloading browsers already in the image.
+    command: ["sh", "-c", "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install --ignore-scripts && npx playwright test"]
 
 volumes:
   playwright-artifacts:
