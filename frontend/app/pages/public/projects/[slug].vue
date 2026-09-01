@@ -8,7 +8,7 @@ const config = useRuntimeConfig()
 // Use the internal base on the server, public base on the client.
 const { data: project, error } = await useAsyncData<PublicProject>(
   `public-project-${slug}`,
-  () => $fetch(`/api/v1/projects/public/${slug}`, {
+  () => $fetch(`/projects/public/${slug}`, {
     baseURL: import.meta.server ? config.apiInternalBase : config.public.apiBase,
   }),
 )

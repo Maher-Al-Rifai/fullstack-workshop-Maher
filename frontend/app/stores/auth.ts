@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(credentials: LoginRequest): Promise<void> {
     const config = useRuntimeConfig()
-    const data = await $fetch<TokenResponse>('/api/v1/auth/login', {
+    const data = await $fetch<TokenResponse>('/auth/login', {
       baseURL: config.public.apiBase,
       method: 'POST',
       body: { email: credentials.email, password: credentials.password },
@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function register(payload: RegisterRequest): Promise<void> {
     const config = useRuntimeConfig()
-    await $fetch<User>('/api/v1/auth/register', {
+    await $fetch<User>('/auth/register', {
       baseURL: config.public.apiBase,
       method: 'POST',
       body: payload,
@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function refresh(): Promise<boolean> {
     try {
       const config = useRuntimeConfig()
-      const data = await $fetch<TokenResponse>('/api/v1/auth/refresh', {
+      const data = await $fetch<TokenResponse>('/auth/refresh', {
         baseURL: config.public.apiBase,
         method: 'POST',
         credentials: 'include',
@@ -48,7 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function loadMe(): Promise<void> {
     const config = useRuntimeConfig()
-    user.value = await $fetch<User>('/api/v1/auth/me', {
+    user.value = await $fetch<User>('/auth/me', {
       baseURL: config.public.apiBase,
       headers: accessToken.value
         ? { Authorization: `Bearer ${accessToken.value}` }
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout(): Promise<void> {
     try {
       const config = useRuntimeConfig()
-      await $fetch('/api/v1/auth/logout', {
+      await $fetch('/auth/logout', {
         baseURL: config.public.apiBase,
         method: 'POST',
         credentials: 'include',

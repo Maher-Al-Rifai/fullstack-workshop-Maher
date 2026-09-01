@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { normalizeError } from '~/utils/api-client'
+
 definePageMeta({
   title: 'Sign in',
   middleware: [
@@ -30,7 +32,7 @@ async function handleSubmit() {
     await navigateTo(redirect)
   }
   catch (err: unknown) {
-    error.value = (err as { message?: string })?.message ?? 'Invalid email or password.'
+    error.value = normalizeError(err).message
   }
   finally {
     pending.value = false

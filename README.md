@@ -1,12 +1,11 @@
-# Full-stack intern workshop — learner starter
+# Full-stack intern workshop — Workboard
 
-This is the intentionally small starting point exported from the complete instructor/reference package. It proves that the workstation, Docker network, FastAPI process, Nuxt process, and PostgreSQL connection work. The numbered workshop modules guide you from this baseline to the complete Workboard application.
+Modules 00–13 complete. The full application stack is running: authenticated CRUD for projects and tasks, server-side rendered public pages, and a Vitest unit/component test suite.
 
 ## Start here
 
 ```bash
 cp .env.example .env
-./scripts/setup.sh
 docker compose up --build
 ```
 
@@ -17,11 +16,13 @@ Open:
 - backend ready health: <http://localhost:8000/health/ready>
 - backend OpenAPI: <http://localhost:8000/docs>
 
-Validate the exported package and run the starter tests:
+Run all quality gates:
 
 ```bash
-make validate
-make test
+make backend-test       # pytest + ruff + mypy
+make frontend-test      # vitest run
+make frontend-lint      # eslint
+make frontend-typecheck # vue-tsc
 ```
 
 Stop and delete the disposable database volume:
@@ -30,21 +31,29 @@ Stop and delete the disposable database volume:
 make clean
 ```
 
-## What is deliberately absent
+## What is implemented
 
-The starter does not contain the completed authentication/domain implementation, migrations, project/task routes, typed frontend service layer, production-quality tests, Playwright suite, complete CI gates, or a proven cloud deployment. It does include deliberately incomplete CI/deployment and infrastructure scaffolds so later modules have a reviewable destination. Those outcomes are the learning work. Do not copy an entire completed reference tree: implement module-sized changes, explain them, test them, and submit evidence.
+- FastAPI with versioned `/api/v1` router, Pydantic schemas, SQLAlchemy models, Alembic migrations.
+- Argon2 password hashing, JWT access tokens, HTTP-only refresh-cookie rotation.
+- CORS configured for `localhost:3000` (development).
+- Projects and tasks CRUD with ownership enforcement.
+- Nuxt 4 frontend: login, register, dashboard, projects list, project detail with task management.
+- SSR public project page with prerendering and Open Graph meta.
+- Pinia auth store with token refresh and unauthenticated redirect.
+- Vitest suite: pure utils, API client, TaskCard component (41 tests).
+- Professional inline error messages via `normalizeError` on all pages.
 
-## Learning path
+## Remaining modules
 
-Read [the starter scope](STARTER_SCOPE.md) and [validation baseline](VALIDATION_REPORT.md). Then begin with [Module 00](workshop/00-orientation-and-definition-of-done.md), follow [the workshop index](workshop/README.md), and keep a personal copy of [the learning log](learner/LEARNING_LOG.md).
+Modules 14–19 cover Docker Compose full-stack integration, Playwright E2E, GitHub Actions CI, Google Cloud deployment, and production operations.
 
-## Starter architecture
+## Architecture
 
 ```text
 browser -> Nuxt :3000
               |
-              v
+              v  (client-side: localhost:8000 | server-side: backend:8000)
           FastAPI :8000 -> PostgreSQL :5432
 ```
 
-The frontend starter calls its own Nuxt health route so that it can render before the application API contract is introduced. Module 03 defines the contract; subsequent modules replace the placeholder screen with the full product.
+Follow [the workshop index](workshop/README.md) and keep a personal copy of [the learning log](learner/LEARNING_LOG.md).

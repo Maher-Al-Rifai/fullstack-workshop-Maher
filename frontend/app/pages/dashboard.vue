@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { normalizeError } from '~/utils/api-client'
+
 definePageMeta({ title: 'Dashboard', middleware: ['auth'] })
 useSeoMeta({ title: 'Dashboard — Workboard', robots: 'noindex' })
 
@@ -14,7 +16,7 @@ onMounted(async () => {
     projects.value = await listProjects()
   }
   catch (err: unknown) {
-    fetchError.value = (err as { message?: string })?.message ?? 'Failed to load projects.'
+    fetchError.value = normalizeError(err).message
   }
   finally {
     pending.value = false

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Project } from '~/types'
+import { normalizeError } from '~/utils/api-client'
 
 definePageMeta({ title: 'Projects', middleware: ['auth'] })
 useSeoMeta({ title: 'Projects — Workboard', robots: 'noindex' })
@@ -23,7 +24,7 @@ onMounted(async () => {
     projects.value = await listProjects()
   }
   catch (err: unknown) {
-    fetchError.value = (err as { message?: string })?.message ?? 'Failed to load projects.'
+    fetchError.value = normalizeError(err).message
   }
   finally {
     pending.value = false
@@ -47,7 +48,7 @@ async function handleCreate() {
     newIsPublic.value = false
   }
   catch (err: unknown) {
-    createError.value = (err as { message?: string })?.message ?? 'Failed to create project.'
+    createError.value = normalizeError(err).message
   }
   finally {
     creating.value = false

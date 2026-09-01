@@ -1,25 +1,29 @@
-# Starter FastAPI service
+# FastAPI service — Workboard backend
 
-This intentionally small service establishes the process, configuration, database connection, and health-check conventions used by the workshop. Modules 05–09 replace this baseline with versioned routers, schemas, models, migrations, services, repositories, authentication, and a layered test suite.
+Modules 05–09 built on top of the starter to produce a production-shaped FastAPI service with versioned routes, Pydantic schemas, SQLAlchemy 2.0 models, Alembic migrations, argon2 authentication, JWT + HTTP-only cookie refresh, CORS, and a full pytest suite.
 
-## Local verification
-
-From the exported starter repository:
+## Quality gates
 
 ```bash
 make backend-test
 ```
 
-For a direct Python workflow, provide a reachable `DATABASE_URL`, then run:
+Or directly:
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
-pytest
+pytest --cov=app --cov-fail-under=80
 ruff check .
 ruff format --check .
+mypy app
 ```
 
-The starter test protects liveness without requiring PostgreSQL. Readiness deliberately checks the real database dependency.
+## Key decisions
+
+- Routes handle HTTP concerns only; services own business rules; repositories own query mechanics.
+- Pydantic schemas are the external contract; SQLAlchemy models are persistence structures — never share them.
+- All database changes go through an Alembic migration.
+- `CORSMiddleware` allows `localhost:3000` in development; production origins are set via environment variable.

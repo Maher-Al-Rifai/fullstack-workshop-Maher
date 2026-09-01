@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Task, TaskStatus } from '~/types'
+import { normalizeError } from '~/utils/api-client'
 
 definePageMeta({ title: 'Project detail', middleware: ['auth'] })
 useSeoMeta({ robots: 'noindex' })
@@ -31,7 +32,7 @@ onMounted(async () => {
     ])
   }
   catch (err: unknown) {
-    fetchError.value = (err as { message?: string })?.message ?? 'Project not found or access denied.'
+    fetchError.value = normalizeError(err).message
   }
   finally {
     pending.value = false
@@ -46,7 +47,7 @@ async function handleAdvance(taskId: number, toStatus: TaskStatus) {
     if (idx !== -1) tasks.value[idx] = updated
   }
   catch (err: unknown) {
-    taskError.value = (err as { message?: string })?.message ?? 'Could not update task.'
+    taskError.value = normalizeError(err).message
   }
 }
 
@@ -57,7 +58,7 @@ async function handleDelete(taskId: number) {
     tasks.value = tasks.value.filter(t => t.id !== taskId)
   }
   catch (err: unknown) {
-    taskError.value = (err as { message?: string })?.message ?? 'Could not delete task.'
+    taskError.value = normalizeError(err).message
   }
 }
 
@@ -72,7 +73,7 @@ async function handleCreateTask() {
     showTaskForm.value = false
   }
   catch (err: unknown) {
-    taskError.value = (err as { message?: string })?.message ?? 'Failed to create task.'
+    taskError.value = normalizeError(err).message
   }
   finally {
     creatingTask.value = false

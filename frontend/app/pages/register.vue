@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { normalizeError } from '~/utils/api-client'
+
 definePageMeta({
   title: 'Register',
   middleware: [
@@ -28,7 +30,7 @@ async function handleSubmit() {
     await navigateTo('/dashboard')
   }
   catch (err: unknown) {
-    error.value = (err as { message?: string })?.message ?? 'Registration failed. That email may already be registered.'
+    error.value = normalizeError(err).message
   }
   finally {
     pending.value = false

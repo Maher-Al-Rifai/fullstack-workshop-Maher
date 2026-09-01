@@ -2,7 +2,7 @@
 FROM node:22.16.0-alpine AS dependencies
 WORKDIR /workspace
 COPY package.json ./
-RUN npm install --no-audit --no-fund
+RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 FROM dependencies AS development
 COPY . .

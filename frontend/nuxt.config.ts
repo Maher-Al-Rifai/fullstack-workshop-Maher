@@ -25,6 +25,7 @@ export default defineNuxtConfig({
   },
   typescript: {
     strict: true,
-    typeCheck: true,
+    // run `npm run typecheck` explicitly; vite-plugin-checker misfires on happy-dom/vitest types
+    typeCheck: false,
   },
 })
