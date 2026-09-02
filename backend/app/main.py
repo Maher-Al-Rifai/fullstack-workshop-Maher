@@ -12,11 +12,12 @@ settings = get_settings()
 
 
 @asynccontextmanager
-async def lifespan(application: FastAPI):  # type: ignore[type-arg]
-    # Ensure all tables exist; idempotent — safe on an already-migrated database.
-    from app.db.session import engine
-    from app.models import Base  # noqa: PLC0415
-    Base.metadata.create_all(engine)
+async def lifespan(application: FastAPI):
+    if settings.environment != "production":
+        from app.db.session import engine
+        from app.models import Base  # noqa: PLC0415
+
+        Base.metadata.create_all(engine)
     yield
 
 

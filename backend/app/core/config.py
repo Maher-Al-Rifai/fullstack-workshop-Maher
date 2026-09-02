@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "Workboard Starter API"
+    environment: str = "development"
     database_url: str = (
         "postgresql+psycopg://workboard:workboard-local-only@db:5432/workboard"
     )
