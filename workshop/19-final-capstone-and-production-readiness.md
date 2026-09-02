@@ -32,7 +32,7 @@ Create a release candidate from a green reviewed commit. Record source SHA and e
 ```bash
 git status
 git rev-parse HEAD
-python scripts/validate-repository.py
+python scripts/validate-starter.py
 ./scripts/check-secrets.sh
 make verify
 ```

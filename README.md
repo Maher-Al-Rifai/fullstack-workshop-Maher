@@ -1,6 +1,6 @@
 # Full-stack intern workshop — Workboard
 
-Modules 00–13 complete. The full application stack is running: authenticated CRUD for projects and tasks, server-side rendered public pages, and a Vitest unit/component test suite.
+Modules 00–19 implementation complete. The full application stack includes authenticated CRUD for projects and tasks, server-side rendered public pages, CI/CD, cloud deployment definitions, observability, rollback, and a production-readiness handover.
 
 ## Start here
 
@@ -43,9 +43,11 @@ make clean
 - Vitest suite: pure utils, API client, TaskCard component (41 tests).
 - Professional inline error messages via `normalizeError` on all pages.
 
-## Remaining modules
+## Final readiness status
 
-Modules 14–19 cover Docker Compose full-stack integration, Playwright E2E, GitHub Actions CI, Google Cloud deployment, and production operations.
+Modules 14–19 cover Docker Compose full-stack integration, Playwright E2E, GitHub Actions CI, Google Cloud deployment, production operations, and final readiness review. Live GCP deployment, browser-domain validation, recovery drills, and organizational production approvals remain environment-specific gates.
+
+See [the engineer handover](docs/handover.md), [the readiness review](docs/production-readiness.md), and [the prioritized risk register](evidence/module-19-risk-register.md).
 
 ## Architecture
 
